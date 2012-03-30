@@ -1,0 +1,13 @@
+{
+    "author": "strager",
+    "name": "v8-telnet",
+    "description": "Simple REPL for the V8 debugger",
+    "version": "0.0.0",
+    "main": "bin/v8-telnet",
+    "dependencies": { },
+    "devDependencies": { },
+    "optionalDependencies": { },
+    "engines": {
+        "node": "0.6.x"
+    }
+}
