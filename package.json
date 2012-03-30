@@ -4,7 +4,9 @@
     "description": "Simple REPL for the V8 debugger",
     "version": "0.0.0",
     "main": "bin/v8-telnet",
-    "dependencies": { },
+    "dependencies": {
+        "v8-socket": "0.0.0"
+    },
     "devDependencies": { },
     "optionalDependencies": { },
     "engines": {
