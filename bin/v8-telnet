@@ -124,11 +124,12 @@ V8Socket.prototype.request = function request(data, callback) {
 V8Socket.prototype.receiveData = function receiveData(data) {
     this.emit('data', data);
 
+    var body = data['body'];
+
     switch (data['type']) {
     case 'response':
         var seqID = Number(data['request_seq']);
         var err = data['success'] === true ? null : new Error(data['message'])
-        var body = data['body'];
 
         if (Object.prototype.hasOwnProperty.call(this.seqCallbacks, seqID)) {
             this.seqCallbacks[seqID].call(null, err, body);
@@ -136,6 +137,10 @@ V8Socket.prototype.receiveData = function receiveData(data) {
             this.emit('error', err);
         }
 
+        break;
+
+    case 'event':
+        this.emit('event', body);
         break;
 
     default:
@@ -151,21 +156,30 @@ var socket = net.connect(5858, function on_connect(err) {
     var v8Socket = new V8Socket(socket);
 
     var r = repl.start('v8-telnet> ', null, function replEval(command, global, _, callback) {
-        command = /^\(([^]*)\n\)$/.exec(command)[1];
-
-        if (!command) {
+        var match = /^\(([^]*)\n\)$/.exec(command);
+        if (!match) {
             callback(null);
         }
 
+        var requestString = match[1].trim();
+        if (!requestString || requestString === 'undefined') {
+            callback(null);
+            return;
+        }
+
         try {
-            var request = JSON.parse(command);
+            var request = JSON.parse(requestString);
             v8Socket.request(request, callback);
         } catch (e) {
             callback(e);
         }
     });
 
+    v8Socket.on('event', function on_event(event) {
+        console.info("\nReceived event:", event);
+    });
+
     v8Socket.on('close', function on_close() {
-        r.commands['.exit'].action();
+        r.commands['.exit'].action.call(r);
     });
 });
